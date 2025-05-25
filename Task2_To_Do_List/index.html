@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>To-Do List</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>To-Do List</h2>
+    <form id="task-form">
+      <input type="text" id="new-task" placeholder="Add new task..." required />
+      <button type="submit" class="add-btn">Add</button>
+    </form>
+    <ul id="task-list"></ul>
+  </div>
+
+  <div id="edit-popup" class="popup hidden">
+    <div class="popup-content">
+      <h3>Edit Task</h3>
+      <input type="text" id="edit-input" />
+      <div class="popup-actions">
+        <button id="save-edit">Save</button>
+        <button id="cancel-edit">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
