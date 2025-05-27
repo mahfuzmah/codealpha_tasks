@@ -8,23 +8,26 @@ const cancelEditBtn = document.getElementById("cancel-edit");
 
 let currentEditLi = null;
 
+document.addEventListener("DOMContentLoaded", loadTasks);
+
 taskForm.addEventListener("submit", function (e) {
   e.preventDefault();
   const taskText = newTaskInput.value.trim();
   if (taskText) {
     addTask(taskText);
+    saveTasksToStorage();
     newTaskInput.value = "";
   }
 });
 
-function addTask(text) {
+function addTask(text, completed = false) {
   const li = document.createElement("li");
   li.innerHTML = `
-    <span class="task-text">${text}</span>
+    <span class="task-text ${completed ? "completed" : ""}">${text}</span>
     <div class="task-buttons">
-      <button onclick="toggleComplete(this)">✔</button>
-      <button onclick="editTask(this)">✏</button>
-      <button onclick="deleteTask(this)">🗑</button>
+      <button onclick="toggleComplete(this)" title="Mark as complete">✔</button>
+      <button onclick="editTask(this)" title="Edit task">✏️</button>
+      <button onclick="deleteTask(this)" title="Delete task">🗑</button>
     </div>
   `;
   taskList.appendChild(li);
@@ -33,11 +36,15 @@ function addTask(text) {
 function toggleComplete(button) {
   const span = button.closest("li").querySelector(".task-text");
   span.classList.toggle("completed");
+  saveTasksToStorage();
 }
 
 function deleteTask(button) {
-  const li = button.closest("li");
-  taskList.removeChild(li);
+  if (confirm("Are you sure you want to delete this task?")) {
+    const li = button.closest("li");
+    taskList.removeChild(li);
+    saveTasksToStorage();
+  }
 }
 
 function editTask(button) {
@@ -48,19 +55,38 @@ function editTask(button) {
   editInput.focus();
 }
 
-saveEditBtn.addEventListener("click", () => 
-  {
-    if (currentEditLi && editInput.value.trim()) {
-      currentEditLi.querySelector(".task-text").textContent = editInput.value.trim();
-      editPopup.classList.add("hidden");
-    }
-  }
-);
-
-cancelEditBtn.addEventListener("click", () => 
-  {
+saveEditBtn.addEventListener("click", () => {
+  if (currentEditLi && editInput.value.trim()) {
+    currentEditLi.querySelector(".task-text").textContent = editInput.value.trim();
     editPopup.classList.add("hidden");
-    currentEditLi = null;
+    editInput.value = "";
+    saveTasksToStorage();
   }
-);
+});
 
+cancelEditBtn.addEventListener("click", () => {
+  editInput.value = "";
+  editPopup.classList.add("hidden");
+  currentEditLi = null;
+});
+
+editInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    saveEditBtn.click();
+  }
+});
+
+function saveTasksToStorage() {
+  const tasks = [];
+  document.querySelectorAll("#task-list li").forEach((li) => {
+    const text = li.querySelector(".task-text").textContent;
+    const completed = li.querySelector(".task-text").classList.contains("completed");
+    tasks.push({ text, completed });
+  });
+  localStorage.setItem("todoTasks", JSON.stringify(tasks));
+}
+
+function loadTasks() {
+  const tasks = JSON.parse(localStorage.getItem("todoTasks")) || [];
+  tasks.forEach((task) => addTask(task.text, task.completed));
+}
